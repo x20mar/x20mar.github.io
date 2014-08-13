@@ -3,4 +3,198 @@ title: "Broadcasting with a Raspberry Pi"
 layout: "post"
 ---
 
-So one of the challenges I came up with working in the charity-based radio station is that they wanted to broadcast some stuff from another room back to the studio. Currently they worked around this by having a laptop with skype in the room connected to a call with another computer with skype back in the studio, which worked for them but they wanted a more stable way of doing this.<br /><br />So I piped up and said, "Oh we can get a Raspberry Pi to do this".<br /><br />In truth I had no idea if a Raspberry Pi could this, I just assumed that it could. After some googling I came across two articles explaining how to do this;<br /><br /><ul style="text-align: left;"><li><a href="http://www.t3node.com/blog/live-streaming-mp3-audio-with-darkice-and-icecast2-on-raspberry-pi/">http://www.t3node.com/blog/live-streaming-mp3-audio-with-darkice-and-icecast2-on-raspberry-pi/</a></li><li><a href="https://sites.google.com/site/glyman3home/raspi-streaming-to-broadcastify">https://sites.google.com/site/glyman3home/raspi-streaming-to-broadcastify</a></li></ul><div>The glyman3home article does reference the t3node article but I felt it missed some logic in the steps provided, plus i wanted a stream to be used internally. So here I am, article one -&nbsp;Broadcasting with a Raspberry Pi</div><div><br /></div><h3 style="text-align: left;">For this you will need the following</h3><div><ul style="text-align: left;"><li>A Raspberry Pi (Model B), with case, a 4GB+ SD card, power supply, etc</li><li>A USB Sound Card (for my work I choose a Creative Soundblaster Play Sound Card, other usb sound cards can work but I wanted one that would just "plug and play" with the Raspberry Pi)</li><li>A microphone/headset</li></ul></div><h3 style="text-align: left;">Preconfigs</h3><div>Download and install Raspbian image for the Raspberry Pi. I used the NOOBS image to do this, which can be found <a href="http://www.raspberrypi.org/downloads/">here</a>. If you are using a 4GB SD card use NOOBS lite and perform a network install.</div><div><br /></div><div>Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.</div><div><br /></div><div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' &gt;&gt; /etc/apt/sources.list"</span></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get update</span></div></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get upgrade</span></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get install vim</span></div><div><br /></div><div>If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get reboot</span></div><h3 style="text-align: left;">Configure the Sound Card</h3><div>Okay so now we need to make sure that the sound card and the Raspberry Pi can talk to each other, to do this we can use arecord to tell us</div><div><br /></div><div><div><span style="font-family: Courier New, Courier, monospace;">$ arecord -l</span></div><div><span style="font-family: Courier New, Courier, monospace;">**** List of CAPTURE Hardware Devices ****</span></div><div><span style="font-family: Courier New, Courier, monospace;">card 1: U0x46d0x825 [USB Device 0x46d:0x825], device 1: USB Audio [USB Audio]</span></div><div><span style="font-family: Courier New, Courier, monospace;">&nbsp; Subdevices: 1/1</span></div><div><span style="font-family: Courier New, Courier, monospace;">&nbsp; Subdevice #0: subdevice #0</span></div></div><div><br /></div><div>arecord will then provide a list available sound cards each with a device number (we'll need that later). In truth thou there should only be one device listed.</div><div><br /></div><div>Plugin your microphone into the sound card and connect speakers to the Raspberry Pi audio (not the sound card audio out), we're now going to test if it works. Once you are ready run this command and talk into the microphone, it creates a file called temp.wav</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;arecord -D plughw:1,0 temp.wav #Replace 1 with your device number</span></div><div><span style="font-family: inherit;"><br /></span></div><div><span style="font-family: inherit;">Once you have finished saying random stuff to the m</span>ic, press Ctrl-C to stop recording. Now run this command to see if we can hear the audio</div><div><br /></div><div style="text-align: left;"><span style="font-family: Courier New, Courier, monospace;">$&nbsp;<span style="background-color: white; color: #333333; line-height: 24px;">aplay temp.wav</span></span></div><div style="text-align: left;"><span style="font-family: inherit;"><span style="background-color: white; color: #333333; line-height: 24px;"><br /></span><span style="background-color: white; color: #333333; line-height: 24px;">If you hear something, then great it works, if it doesn't, then you are going to have to do some fiddling around to solve this, first plug in the speakers into the sound card's audio out port and try again, if still nothing then we need to edit the&nbsp;</span></span><span style="color: #333333;"><span style="line-height: 24px;">alsa-base.conf file. As always when editing config files, make a backup first</span></span></div><div style="text-align: left;"><span style="color: #333333;"><span style="line-height: 24px;"><br /></span></span></div><div style="text-align: left;"><span style="color: #333333; font-family: Courier New, Courier, monospace;"><span style="line-height: 24px;">$&nbsp;sudo cp /etc/modprobe.d/alsa-base.conf /etc/modprobe.d/alsa-base.conf.bck</span></span></div><div style="text-align: left;"><span style="color: #333333;"><span style="line-height: 24px;"><br /></span></span></div><div style="text-align: left;"><span style="color: #333333;"><span style="line-height: 24px;">Now edit the file&nbsp;</span></span></div><div style="text-align: left;"><span style="color: #333333;"><span style="line-height: 24px;"><br /></span></span></div><div style="text-align: left;"><span style="color: #333333; font-family: Courier New, Courier, monospace;"><span style="line-height: 24px;">$&nbsp;sudo vim /etc/modprobe.d/alsa-base.conf</span></span></div><div><br /></div><div>and comment out the following line</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;"># options snd-usb-audio index=-2</span></div><div><br /></div><div>save and reboot the Raspberry Pi</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo reboot</span></div><div><br /></div><div>Once rebooted, repeat the steps in the section to test if recording works,<b> n.b. your device number may change</b></div><div><br /></div><div>If it is too soft or is distorted, try using the following command to access the tool to balance the recording level.</div><div><br /></div><div style="text-align: left;"><span style="font-family: Courier New, Courier, monospace;">$ sudo alsamixer</span></div><div><br /></div><div>Once you are happy with the sound quality run the following command to save the settings</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo alsactl store</span></div><h3 style="text-align: left;"><span style="font-family: inherit;">DarkIce</span></h3><div>Both articles mentions compiling darkice to be used with mp3 support and all that. Rather than installing lots of packages to do this, I've done this for you, as you get get the deb package from my <a href="https://github.com/x20mar/darkice-with-mp3-for-raspberry-pi">github account</a>.&nbsp;</div><div><br /></div><div>So download the darkice deb package and install</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ wget&nbsp;https://github.com/x20mar/darkice-with-mp3-for-raspberry-pi/blob/master/darkice_1.0.1-999~mp3+1_armhf.deb?raw=true #note link may change!</span></div><div><span style="font-family: Courier New, Courier, monospace;">$ mv darkice_1.0.1-999~mp3+1_armhf.deb?raw=true darkice_1.0.1-999~mp3+1_armhf.deb</span></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get install&nbsp;libmp3lame0&nbsp;libtwolame0&nbsp;</span></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo dpkg -i darkice_1.0.1-999~mp3+1_armhf.deb</span></div><div><br /></div><div>After all that we now need to configure darkice for our needs. Fortunately darkice comes prepackaged with a template config that we can use</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo cp /usr/share/doc/darkice/examples/darkice.cfg /etc/</span></div><div><br /></div><div>Now before we start configuring, darkice will need to connect to an icecast2 server, and you will need to know the configuration details of it. if you don't have one then you can install it on your Raspberry Pi</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo apt-get install icecast2</span></div><div><br /></div><div>Now using your favourite text editor, edit the darkice config file to use the right sound card and talk to icecast2. You will need to change device to be&nbsp;plughw:1,0 (change to reflect your device number)</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo vim sudo vim /etc/darkice.cfg</span></div><div><br /></div><div>I should point out that this is based upon a sample config and it is not optimised or secure. Look at the man page for more information</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;man darkice.cfg</span></div><div><span style="font-family: Courier New, Courier, monospace;"><br /></span></div><div>I wasn't too fussed about security as it was being used internally so in the end my config looked like this</div><div><br /></div><div><div><span style="font-family: Courier New, Courier, monospace;"># this section describes general aspects of the live streaming session</span></div><div><span style="font-family: Courier New, Courier, monospace;">[general]</span></div><div><span style="font-family: Courier New, Courier, monospace;">duration &nbsp; &nbsp; &nbsp; &nbsp;= 0 &nbsp; &nbsp; &nbsp; &nbsp;# duration of encoding, in seconds. 0 means forever</span></div><div><span style="font-family: Courier New, Courier, monospace;">bufferSecs &nbsp; &nbsp; &nbsp;= 5 &nbsp; &nbsp; &nbsp; &nbsp; # size of internal slip buffer, in seconds</span></div><div><span style="font-family: Courier New, Courier, monospace;">reconnect &nbsp; &nbsp; &nbsp; = yes &nbsp; &nbsp; &nbsp; # reconnect to the server(s) if disconnected</span></div><div><span style="font-family: Courier New, Courier, monospace;"><br /></span></div><div><span style="font-family: Courier New, Courier, monospace;"># this section describes the audio input that will be streamed</span></div><div><span style="font-family: Courier New, Courier, monospace;">[input]</span></div><div><span style="font-family: Courier New, Courier, monospace;"># device &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= /dev/dsp &nbsp;# OSS DSP soundcard device for the audio input</span></div><div><span style="font-family: Courier New, Courier, monospace;">device &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= plughw:0,0 &nbsp;# OSS DSP soundcard device for the audio input</span></div><div><span style="font-family: Courier New, Courier, monospace;">sampleRate &nbsp; &nbsp; &nbsp;= 22050 &nbsp; &nbsp; # sample rate in Hz. try 11025, 22050 or 44100</span></div><div><span style="font-family: Courier New, Courier, monospace;">bitsPerSample &nbsp; = 16 &nbsp; &nbsp; &nbsp; &nbsp;# bits per sample. try 16</span></div><div><span style="font-family: Courier New, Courier, monospace;">channel &nbsp; &nbsp; &nbsp; &nbsp; = 2 &nbsp; &nbsp; &nbsp; &nbsp; # channels. 1 = mono, 2 = stereo</span></div><div><span style="font-family: Courier New, Courier, monospace;"><br /></span></div><div><span style="font-family: Courier New, Courier, monospace;"># this section describes a streaming connection to an IceCast2 server</span></div><div><span style="font-family: Courier New, Courier, monospace;"># there may be up to 8 of these sections, named [icecast2-0] ... [icecast2-7]</span></div><div><span style="font-family: Courier New, Courier, monospace;"># these can be mixed with [icecast-x] and [shoutcast-x] sections</span></div><div><span style="font-family: Courier New, Courier, monospace;">[icecast2-0]</span></div><div><span style="font-family: Courier New, Courier, monospace;">bitrateMode &nbsp; &nbsp; = abr &nbsp; &nbsp; &nbsp; # average bit rate</span></div><div><span style="font-family: Courier New, Courier, monospace;">format &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= mp3 &nbsp; &nbsp; &nbsp; # format of the stream: ogg vorbis</span></div><div><span style="font-family: Courier New, Courier, monospace;">bitrate &nbsp; &nbsp; &nbsp; &nbsp; = 96 &nbsp; &nbsp; &nbsp; &nbsp;# bitrate of the stream sent to the server</span></div><div><span style="font-family: Courier New, Courier, monospace;">server &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= localhost # host name of the server</span></div><div><span style="font-family: Courier New, Courier, monospace;">port &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= 8000 &nbsp; &nbsp; &nbsp;# port of the IceCast2 server, usually 8000</span></div><div><span style="font-family: Courier New, Courier, monospace;">password &nbsp; &nbsp; &nbsp; &nbsp;= lolcat123</span><span style="font-family: 'Courier New', Courier, monospace;">&nbsp;# source password to the IceCast2 server</span></div><div><span style="font-family: Courier New, Courier, monospace;">mountPoint &nbsp; &nbsp; &nbsp;= mic &nbsp;# mount point of this stream on the IceCast2 server</span></div><div><span style="font-family: Courier New, Courier, monospace;">name &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= Microphone Raspberry Pi # name of the stream</span></div><div><span style="font-family: Courier New, Courier, monospace;">description &nbsp; &nbsp; = Broadcast from 2nd room # description of the stream</span></div><div><span style="font-family: Courier New, Courier, monospace;">url &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; = http://example.com/ # URL related to the stream</span></div><div><span style="font-family: Courier New, Courier, monospace;">genre &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; = my own &nbsp; &nbsp;# genre of the stream</span></div><div><span style="font-family: Courier New, Courier, monospace;">public &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;= yes &nbsp; &nbsp; &nbsp; # advertise this stream?</span></div></div><div><br /></div><div>Once you have done that it's time to test your configuration file</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ sudo darkice</span></div><div><br /></div><div>If you get any errors, google them and fix them and then try again. After that, connect to the icecast2 server via a web browser on another computer and test if the stream works.</div><h3 style="text-align: left;">Boot on start</h3><div>Now that we have darkice working and everything we now need to make it automaticly when the Raspberry Pi is booted. First step we an&nbsp;init script for darkice. One can be found back in the <a href="https://github.com/x20mar/darkice-with-mp3-for-raspberry-pi/blob/master/init.d-darkice">github repo</a>. So get the file and make it executable.</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$ wget https://raw.githubusercontent.com/x20mar/darkice-with-mp3-for-raspberry-pi/master/init.d-darkice</span></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo mv init.d-darkice /etc/init.d/darkice</span></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo chmod +x /etc/init.d/darkice</span></div><div><br /></div><div>Now darkice can be started by calling</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo /etc/init.d/darkice start</span></div><div><br /></div><div>and stopped</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo /etc/init.d/darkice stop</span></div><div><br /></div><div>Finally run this command to add the init to be started at boot-up</div><div><br /></div><div><span style="font-family: Courier New, Courier, monospace;">$&nbsp;sudo update-rc.d darkice defaults</span></div><h3 style="text-align: left;">Done</h3><div>And we're finished. A big thanks again to t3node and glyman3home for their articles, I hope you find it useful. Comment, thoughts, reviews let me know!
+So one of the challenges I came up with working in the charity-based radio station is that they wanted to broadcast some stuff from another room back to the studio. Currently they worked around this by having a laptop with skype in the room connected to a call with another computer with skype back in the studio, which worked for them but they wanted a more stable way of doing this.
+
+So I piped up and said, "Oh we can get a Raspberry Pi to do this".
+
+In truth I had no idea if a Raspberry Pi could this, I just assumed that it could. After some googling I came across two articles explaining how to do this;
+
+* [http://www.t3node.com/blog/live-streaming-mp3-audio-with-darkice-and-icecast2-on-raspberry-pi/]
+* [https://sites.google.com/site/glyman3home/raspi-streaming-to-broadcastify]
+
+The glyman3home article does reference the t3node article but I felt it missed some logic in the steps provided, plus I wanted a stream to be used internally. So here I am, article one, Broadcasting with a Raspberry Pi
+
+### For this you will need the following
+
+* A Raspberry Pi (Model B), with case, a 4GB+ SD card, power supply, etc
+* A USB Sound Card (for my work I choose a Creative Soundblaster Play Sound Card, other usb sound cards can work but I wanted one that would just "plug and play" with the Raspberry Pi)
+* A microphone/headset
+
+### Preconfigs
+
+Download and install Raspbian image for the Raspberry Pi. I used the NOOBS image to do this, which can be found [here](http://www.raspberrypi.org/downloads/). If you are using a 4GB SD card use NOOBS lite and perform a network install.
+
+Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.
+
+```vim
+$ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list"
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install vim
+```
+
+If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config
+
+```vim
+$ sudo apt-get reboot
+```
+
+### Configure the Sound Card
+
+Okay so now we need to make sure that the sound card and the Raspberry Pi can talk to each other, to do this we can use arecord to tell us
+
+```vim
+$ arecord -l
+**** List of CAPTURE Hardware Devices ****
+card 1: U0x46d0x825 [USB Device 0x46d:0x825], device 1: USB Audio [USB Audio]
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0
+```
+
+arecord will then provide a list available sound cards each with a device number (we'll need that later). In truth thou there should only be one device listed.
+
+Plugin your microphone into the sound card and connect speakers to the Raspberry Pi audio (not the sound card audio out), we're now going to test if it works. Once you are ready run this command and talk into the microphone, it creates a file called temp.wav
+
+```vim
+$ arecord -D plughw:1,0 temp.wav #Replace 1 with your device number
+```
+
+Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.
+
+```vim
+$ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list"
+$ sudo apt-get update
+$ sudo apt-get upgrade
+$ sudo apt-get install vim
+```
+
+If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config
+
+```vim
+$ sudo apt-get reboot
+```
+
+Once rebooted, repeat the steps in the section to test if recording works, n.b. your device number may change
+
+If it is too soft or is distorted, try using the following command to access the tool to balance the recording level.
+
+```vim
+$ sudo alsamixer
+```
+
+Once you are happy with the sound quality run the following command to save the settings
+
+```vim
+$ sudo alsactl store
+```
+
+### DarkIce
+
+Both articles mentions compiling darkice to be used with mp3 support and all that. Rather than installing lots of packages to do this, I've done this for you, as you get get the deb package from my github account. 
+
+So download the darkice deb package and install
+
+```vim
+$ wget https://github.com/x20mar/darkice-with-mp3-for-raspberry-pi/blob/master/darkice_1.0.1-999~mp3+1_armhf.deb?raw=true #note link may change!
+$ mv darkice_1.0.1-999~mp3+1_armhf.deb?raw=true darkice_1.0.1-999~mp3+1_armhf.deb
+$ sudo apt-get install libmp3lame0 libtwolame0 
+$ sudo dpkg -i darkice_1.0.1-999~mp3+1_armhf.deb
+```
+
+After all that we now need to configure darkice for our needs. Fortunately darkice comes prepackaged with a template config that we can use
+
+```vim
+$ sudo cp /usr/share/doc/darkice/examples/darkice.cfg /etc/
+```
+
+Now before we start configuring, darkice will need to connect to an icecast2 server, and you will need to know the configuration details of it. if you don't have one then you can install it on your Raspberry Pi
+
+```vim
+$ sudo apt-get install icecast2
+```
+
+Now using your favourite text editor, edit the darkice config file to use the right sound card and talk to icecast2. You will need to change device to be plughw:1,0 (change to reflect your device number)
+
+```vim
+$ sudo vim sudo vim /etc/darkice.cfg
+```
+
+I should point out that this is based upon a sample config and it is not optimised or secure. Look at the man page for more information
+
+```vim
+$ man darkice.cfg
+```
+
+I wasn't too fussed about security as it was being used internally so in the end my config looked like this
+
+```vim
+# this section describes general aspects of the live streaming session
+[general]
+duration        = 0        # duration of encoding, in seconds. 0 means forever
+bufferSecs      = 5         # size of internal slip buffer, in seconds
+reconnect       = yes       # reconnect to the server(s) if disconnected
+
+# this section describes the audio input that will be streamed
+[input]
+# device          = /dev/dsp  # OSS DSP soundcard device for the audio input
+device          = plughw:0,0  # OSS DSP soundcard device for the audio input
+sampleRate      = 22050     # sample rate in Hz. try 11025, 22050 or 44100
+bitsPerSample   = 16        # bits per sample. try 16
+channel         = 2         # channels. 1 = mono, 2 = stereo
+
+# this section describes a streaming connection to an IceCast2 server
+# there may be up to 8 of these sections, named [icecast2-0] ... [icecast2-7]
+# these can be mixed with [icecast-x] and [shoutcast-x] sections
+[icecast2-0]
+bitrateMode     = abr       # average bit rate
+format          = mp3       # format of the stream: ogg vorbis
+bitrate         = 96        # bitrate of the stream sent to the server
+server          = localhost # host name of the server
+port            = 8000      # port of the IceCast2 server, usually 8000
+password        = lolcat123 # source password to the IceCast2 server
+mountPoint      = mic  # mount point of this stream on the IceCast2 server
+name            = Microphone Raspberry Pi # name of the stream
+description     = Broadcast from 2nd room # description of the stream
+url             = http://example.com/ # URL related to the stream
+genre           = my own    # genre of the stream
+public          = yes       # advertise this stream?
+```
+
+Once you have done that it's time to test your configuration file
+
+```vim
+$ sudo darkice
+```
+
+If you get any errors, google them and fix them and then try again. After that, connect to the icecast2 server via a web browser on another computer and test if the stream works.
+Boot on start
+
+Now that we have darkice working and everything we now need to make it automaticly when the Raspberry Pi is booted. First step we an init script for darkice. One can be found back in the github repo. So get the file and make it executable.
+
+```vim
+$ wget https://raw.githubusercontent.com/x20mar/darkice-with-mp3-for-raspberry-pi/master/init.d-darkice
+$ sudo mv init.d-darkice /etc/init.d/darkice
+$ sudo chmod +x /etc/init.d/darkice
+```
+
+Now darkice can be started by calling
+
+```vim
+$ sudo /etc/init.d/darkice start
+```
+
+and stopped
+
+```vim
+$ sudo /etc/init.d/darkice stop
+```
+
+Finally run this command to add the init to be started at boot-up
+
+```vim
+$ sudo update-rc.d darkice defaults
+```
+
+Done
+
+And we're finished. A big thanks again to t3node and glyman3home for their articles, I hope you find it useful.
