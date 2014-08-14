@@ -26,67 +26,67 @@ Download and install Raspbian image for the Raspberry Pi. I used the NOOBS image
 
 Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.
 
-```shell
+{% highlight bash %}
 $ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list"
 $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install vim
-```
+{% endhighlight %}
 
 If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config
 
-```shell
+{% highlight bash %}
 $ sudo apt-get reboot
-```
+{% endhighlight %}
 
 ### Configure the Sound Card
 
 Okay so now we need to make sure that the sound card and the Raspberry Pi can talk to each other, to do this we can use arecord to tell us
 
-```shell
+{% highlight bash %}
 $ arecord -l
 **** List of CAPTURE Hardware Devices ****
 card 1: U0x46d0x825 [USB Device 0x46d:0x825], device 1: USB Audio [USB Audio]
   Subdevices: 1/1
   Subdevice #0: subdevice #0
-```
+{% endhighlight %}
 
 arecord will then provide a list available sound cards each with a device number (we'll need that later). In truth thou there should only be one device listed.
 
 Plugin your microphone into the sound card and connect speakers to the Raspberry Pi audio (not the sound card audio out), we're now going to test if it works. Once you are ready run this command and talk into the microphone, it creates a file called temp.wav
 
-```shell
+{% highlight bash %}
 $ arecord -D plughw:1,0 temp.wav #Replace 1 with your device number
-```
+{% endhighlight %}
 
 Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.
 
-```shell
+{% highlight bash %}
 $ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list"
 $ sudo apt-get update
 $ sudo apt-get upgrade
 $ sudo apt-get install vim
-```
+{% endhighlight %}
 
 If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config
 
-```shell
+{% highlight bash %}
 $ sudo apt-get reboot
-```
+{% endhighlight %}
 
 Once rebooted, repeat the steps in the section to test if recording works, n.b. your device number may change
 
 If it is too soft or is distorted, try using the following command to access the tool to balance the recording level.
 
-```shell
+{% highlight bash %}
 $ sudo alsamixer
-```
+{% endhighlight %}
 
 Once you are happy with the sound quality run the following command to save the settings
 
-```shell
+{% highlight bash %}
 $ sudo alsactl store
-```
+{% endhighlight %}
 
 ### DarkIce
 
@@ -94,36 +94,36 @@ Both articles mentions compiling darkice to be used with mp3 support and all tha
 
 So download the darkice deb package and install
 
-```shell
+{% highlight bash %}
 $ wget https://github.com/x20mar/darkice-with-mp3-for-raspberry-pi/blob/master/darkice_1.0.1-999~mp3+1_armhf.deb?raw=true #note link may change!
 $ mv darkice_1.0.1-999~mp3+1_armhf.deb?raw=true darkice_1.0.1-999~mp3+1_armhf.deb
 $ sudo apt-get install libmp3lame0 libtwolame0 
 $ sudo dpkg -i darkice_1.0.1-999~mp3+1_armhf.deb
-```
+{% endhighlight %}
 
 After all that we now need to configure darkice for our needs. Fortunately darkice comes prepackaged with a template config that we can use
 
-```shell
+{% highlight bash %}
 $ sudo cp /usr/share/doc/darkice/examples/darkice.cfg /etc/
-```
+{% endhighlight %}
 
 Now before we start configuring, darkice will need to connect to an icecast2 server, and you will need to know the configuration details of it. if you don't have one then you can install it on your Raspberry Pi
 
-```shell
+{% highlight bash %}
 $ sudo apt-get install icecast2
-```
+{% endhighlight %}
 
 Now using your favourite text editor, edit the darkice config file to use the right sound card and talk to icecast2. You will need to change device to be plughw:1,0 (change to reflect your device number)
 
-```shell
+{% highlight bash %}
 $ sudo vim sudo vim /etc/darkice.cfg
-```
+{% endhighlight %}
 
 I should point out that this is based upon a sample config and it is not optimised or secure. Look at the man page for more information
 
-```shell
+{% highlight bash %}
 $ man darkice.cfg
-```
+{% endhighlight %}
 
 I wasn't too fussed about security as it was being used internally so in the end my config looked like this
 
@@ -162,38 +162,38 @@ public          = yes       # advertise this stream?
 
 Once you have done that it's time to test your configuration file
 
-```shell
+{% highlight bash %}
 $ sudo darkice
-```
+{% endhighlight %}
 
 If you get any errors, google them and fix them and then try again. After that, connect to the icecast2 server via a web browser on another computer and test if the stream works.
 Boot on start
 
 Now that we have darkice working and everything we now need to make it automaticly when the Raspberry Pi is booted. First step we an init script for darkice. One can be found back in the github repo. So get the file and make it executable.
 
-```shell
+{% highlight bash %}
 $ wget https://raw.githubusercontent.com/x20mar/darkice-with-mp3-for-raspberry-pi/master/init.d-darkice
 $ sudo mv init.d-darkice /etc/init.d/darkice
 $ sudo chmod +x /etc/init.d/darkice
-```
+{% endhighlight %}
 
 Now darkice can be started by calling
 
-```shell
+{% highlight bash %}
 $ sudo /etc/init.d/darkice start
-```
+{% endhighlight %}
 
 and stopped
 
-```shell
+{% highlight bash %}
 $ sudo /etc/init.d/darkice stop
-```
+{% endhighlight %}
 
 Finally run this command to add the init to be started at boot-up
 
-```shell
+{% highlight bash %}
 $ sudo update-rc.d darkice defaults
-```
+{% endhighlight %}
 
 Done
 
