@@ -9,8 +9,8 @@ So I piped up and said, "Oh we can get a Raspberry Pi to do this".
 
 In truth I had no idea if a Raspberry Pi could this, I just assumed that it could. After some googling I came across two articles explaining how to do this;
 
-* [http://www.t3node.com/blog/live-streaming-mp3-audio-with-darkice-and-icecast2-on-raspberry-pi/]
-* [https://sites.google.com/site/glyman3home/raspi-streaming-to-broadcastify]
+* (http://www.t3node.com/blog/live-streaming-mp3-audio-with-darkice-and-icecast2-on-raspberry-pi/)
+* (https://sites.google.com/site/glyman3home/raspi-streaming-to-broadcastify)
 
 The glyman3home article does reference the t3node article but I felt it missed some logic in the steps provided, plus I wanted a stream to be used internally. So here I am, article one, Broadcasting with a Raspberry Pi
 
@@ -127,7 +127,7 @@ $ man darkice.cfg
 
 I wasn't too fussed about security as it was being used internally so in the end my config looked like this
 
-```vim
+```
 # this section describes general aspects of the live streaming session
 [general]
 duration        = 0        # duration of encoding, in seconds. 0 means forever
