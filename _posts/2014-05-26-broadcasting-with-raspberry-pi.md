@@ -27,10 +27,10 @@ Download and install Raspbian image for the Raspberry Pi. I used the NOOBS image
 Once that is up and running, we want to install an extra repo and do updates based upon it, it might be a good idea to install your favourite text editor too, in my case vim.
 
 ```
-$ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list"
-$ sudo apt-get update
-$ sudo apt-get upgrade
-$ sudo apt-get install vim
+$ sudo sh -c "echo 'deb-src http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' >> /etc/apt/sources.list";
+$ sudo apt-get update;
+$ sudo apt-get upgrade;
+$ sudo apt-get install vim;
 ```
 
 If you have not already plugged in the sound card, plug it into the Raspberry Pi and reboot it, so that it is loaded in the config
