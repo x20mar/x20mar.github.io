@@ -127,7 +127,7 @@ $ man darkice.cfg
 
 I wasn't too fussed about security as it was being used internally so in the end my config looked like this
 
-```shell
+{% highlight bash %}
 # this section describes general aspects of the live streaming session
 [general]
 duration        = 0        # duration of encoding, in seconds. 0 means forever
@@ -158,7 +158,7 @@ description     = Broadcast from 2nd room # description of the stream
 url             = http://example.com/ # URL related to the stream
 genre           = my own    # genre of the stream
 public          = yes       # advertise this stream?
-```
+{% endhighlight %}
 
 Once you have done that it's time to test your configuration file
 
