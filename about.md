@@ -1,9 +1,10 @@
 ---
 layout: page
 title: About
+permalink: /about/
 ---
 
-I'm a Software Developer from Edinburgh specialising in Web Application Development
+I'm a Software Developer in London specialising in Web Application Development
 
 ### Key Skills
 
@@ -32,7 +33,6 @@ I'm a Software Developer from Edinburgh specialising in Web Application Developm
 * Both Firebug and the Chrome console are widely used for debugging Javascript problems.
 7. Source Control
 * Experienced in both Git and subversion
-
 
 ### Contact me
 
