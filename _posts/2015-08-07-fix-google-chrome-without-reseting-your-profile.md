@@ -10,17 +10,27 @@ Occasionally you may find that Google Chrome will suffer a crash, after which it
 Most documentation will tell you backup your profile folder and create a new one. But there is an easier way with a lot less hassle
 
 * Go to your Google Profile folder:
+
 ```bash
-C:\Users\NAME\AppData\Local\Google\Chrome\User Data\Default\ or
+C:\Users\NAME\AppData\Local\Google\Chrome\User Data\Default\
+```
+
+or
+
+```bash
 ~/.config/google-chrome/Default
 ```
+
 * Open the Preferences file. This contains a very large JSON object in here (don't be scared)
 * Locate the key-pair
-```Javascript
+
+```JSON
 "exit_type": "Crashed"
 ```
+
 and change it to
-```Javascript
+
+```JSON
 "exit_type": "normal"
 ```
 
