@@ -4,7 +4,11 @@ title: CV
 permalink: /cv/
 ---
 
-# Skills
+### PDF Version
+
+A PDF version, including all my contact details is available upon request
+
+### Skills
 
 **Teamwork**
 
@@ -22,13 +26,13 @@ Experienced in **identifying**, **analysing** and problem solving **individually
 
 Experienced in using Java, PHP, Javascript, MySQL, PostgreSQL, UML, ER Diagrams Smarty, HTML5, CSS3, jQuery, knockout.js, Modernizr, Nodejs, Grunt, Composer, AJAX,  Linux, SOA
 
-# Education
+### Education
 
 Edinburgh Napier University  - **PGDip Advanced Software Engineering**
 
 Heriot-Watt University - BSc Combined Studies (Mathematics) 
 
-# Career Aspirations
+### Career Aspirations
 
 A **bright, talented** and **ambitious** software developer who has gained experience working for startups. Omar has gained invaluable experience in **leading a team** and working to deliver a number of client and product driven projects in both the **UI** and the **server side**. He developed several **SOA platforms** and has written a number of public and private **APIs**.
 
@@ -38,7 +42,7 @@ Omar’s experience highlights his **diverse** ability to adjust to the changing
 
 In his spare time, Omar’s works on various projects using his **github** account and has a particular interest in cloud computing, the emerging IoT platforms and **personal development** using Massive Open Online Courses (MOOCs)
 
-# Employment History
+### Employment History
 
 **January 2016 - Present - Head of BAU - Qinec Ltd / Lumeon Ltd**
 
@@ -108,10 +112,6 @@ Responsibilities include:
 
 * Led team in VAT code changes
 
-# References
+### References
 
 References available on request
-
-# PDF Version
-
-A PDF version, including all my contact details is available upon request
