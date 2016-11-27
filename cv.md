@@ -1,3 +1,9 @@
+---
+layout: page
+title: CV
+permalink: /cv/
+---
+
 # Skills
 
 **Teamwork**
